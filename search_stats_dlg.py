@@ -58,6 +58,4 @@ class SearchStatsDialog(QDialog, Ui_Dialog):
         self.graph.setWindowTitle("Графики характеристик решения")
         self.graph.add_plot(self.graph_size, self.stats, "Зависимость времени прохождения от размера",
                             "Размер лабиринта", "Время прохождения")
-        self.graph.add_plot(self.graph_size, self.stats, "Зависимость времени прохождения от размера",
-                            "Размер лабиринта", "Количество шагов")
         self.graph.show()

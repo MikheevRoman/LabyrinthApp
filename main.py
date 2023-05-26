@@ -1,5 +1,5 @@
 import time
-
+from math_graph import GraphView
 from PyQt5 import QtWidgets, QtGui, QtCore, Qt
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QDialog, QVBoxLayout, QLabel, \
@@ -49,8 +49,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.fullscreen_set_action.triggered.connect(lambda: self.showFullScreen())
         self.fullscreen_exit_action.triggered.connect(lambda: self.showMaximized())
         self.clear_maze_btn.clicked.connect(lambda: self.clear_maze())
+        self.convert_to_graph_btn.clicked.connect(lambda: self.convert_to_graph())
+        self.about_action.triggered.connect(lambda: QMessageBox.about(self, "О программе", "Программа разработа в рамках научно-исследовательской работы студентами факультета ИКСС СПбГУТ"))
 
-    maze_gen_algorythms = [algorythms.growing_tree, algorythms.aldous_broder, algorythms.wilson, algorythms.backtracking, algorythms.binary_tree, algorythms.kruskal,
+    maze_gen_algorythms = [algorythms.growing_tree, algorythms.aldous_broder, algorythms.wilson, algorythms.backtracking, algorythms.binary_tree, algorythms.kruskal, algorythms.eller,
                            algorythms.modified_prim, algorythms.sidewinder, algorythms.division, algorythms.serpentine, algorythms.small_rooms, algorythms.spiral]
     maze_solve_algorythms = [algorythms.ai_lab_solve, algorythms.a_star, algorythms.dijkstra, algorythms.bfs]
     global_grid = []
@@ -78,7 +80,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 QMessageBox.warning(self, "Ошибка", "Выберите способ генерации лабиринта")
                 return
             start_time = time.time()
-            grid = self.maze_gen_algorythms[self.generationMethod_comboBox.currentIndex()](y_size, x_size)
+            grid = self.maze_gen_algorythms[self.generationMethod_comboBox.currentIndex() - 1](y_size, x_size)
             self.generation_time = time.time() - start_time
 
             self.global_grid = grid
@@ -99,6 +101,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             QMessageBox.warning(self, "Ошибка", "Ширина и длина лабиринта должны быть >=4 и принимать нечетные значения")
 
+    def convert_to_graph(self):
+        graph = GraphView()
+        #
+        #   ...
+        #
+        self.graphicsView.setScene(graph.get_scene())
+
     def show_path(self):
         # len(self.global_grid[0] - x
         if self.start_point > 0 and self.end_point > 0:
@@ -112,7 +121,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if method == 0:
             QMessageBox.warning(self, "Ошибка", "Выберите способ решения")
             return
-        path = self.maze_solve_algorythms[method](self.global_grid, start, end)
+        path = self.maze_solve_algorythms[method - 1](self.global_grid, start, end)
 
         newbie_grid = []
         scene_grid = self.graphicsView.items()

@@ -49,6 +49,7 @@ class GenerationStatsDialog(QDialog, Ui_Dialog):
             sum_dead_ends /= count
             self.stats.append(sum_time)
             self.dead_ends_stat.append(sum_dead_ends)
+            print(sum_time, sum_dead_ends)
 
         print(self.stats)
         self.show_graph()
