@@ -3,6 +3,7 @@ from typing import List, Callable, Tuple
 from collections import deque
 from math import inf
 import heapq
+import numpy as np
 
 
 class Heuristic:
@@ -538,3 +539,39 @@ def num_of_dead_ends(maze):
             if count == 3:
                 dead_ends += 1
     return dead_ends - 1
+
+
+# преобразование лабиринта в матрицу смежности
+def transform_to_adjacency_table(maze: List[List[bool]]):
+    weight = len(maze[0])
+    height = len(maze)
+    len_adjacency_table = weight * height
+    adjacency_table = list(list(np.inf for j in range(len_adjacency_table)) for i in range(len_adjacency_table))
+    for i in range(len(maze)):
+        for j in range(len(maze[0])):
+            if not maze[i][j]:
+                adjacency_table[i * weight + j][i * weight + j] = 0
+                if i - 1 >= 0:
+                    if not maze[i - 1][j]:
+                        adjacency_table[i * weight + j][(i - 1) * weight + j] = 1
+                if i + 1 < height:
+                    if not maze[i + 1][j]:
+                        adjacency_table[i * weight + j][(i + 1) * weight + j] = 1
+                if j - 1 >= 0:
+                    if not maze[i][j - 1]:
+                        adjacency_table[i * weight + j][i * weight + (j - 1)] = 1
+                if j + 1 < weight:
+                    if not maze[i][j + 1]:
+                        adjacency_table[i * weight + j][i * weight + (j + 1)] = 1
+    print(adjacency_table)
+    return adjacency_table
+
+
+def convert_adjacency_matrix_for_vertexes(adjacency_matrix: List[List]):
+    edges = [tuple]
+    for i in range(len(adjacency_matrix)):
+        for j in range(len(adjacency_matrix[0])):
+            if adjacency_matrix[i][j]:
+                edge = (i, j)
+                edges.append(edge)
+    return edges

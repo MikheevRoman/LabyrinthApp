@@ -60,6 +60,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     search_time = 0.0
     start_point = 0
     end_point = 0
+    x_size = 0
+    y_size = 0
 
     def solution_stat_collection(self):
         dlg = SearchStatsDialog()
@@ -73,24 +75,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         global grid, start_time
         if (self.y_lineEdit.text() != '') and (self.x_lineEdit.text() != '') \
                 and (int(self.y_lineEdit.text()) >= 3) and (int(self.y_lineEdit.text()) >= 3) and (int(self.y_lineEdit.text()) % 2 != 0) and (int(self.x_lineEdit.text()) % 2 != 0):
-            y_size = int(self.y_lineEdit.text())
-            x_size = int(self.x_lineEdit.text())
+            self.y_size = int(self.y_lineEdit.text())
+            self.x_size = int(self.x_lineEdit.text())
 
             if self.generationMethod_comboBox.currentIndex() == 0:
                 QMessageBox.warning(self, "Ошибка", "Выберите способ генерации лабиринта")
                 return
             start_time = time.time()
-            grid = self.maze_gen_algorythms[self.generationMethod_comboBox.currentIndex() - 1](y_size, x_size)
+            grid = self.maze_gen_algorythms[self.generationMethod_comboBox.currentIndex() - 1](self.y_size, self.x_size)
             self.generation_time = time.time() - start_time
 
             self.global_grid = grid
             scene = QGraphicsScene()
             self.graphicsView.setScene(scene)
             # Создаем прямоугольник для каждой ячейки лабиринта
-            cell_size = max(20 * 30/max(x_size, y_size), 15)
+            cell_size = max(20 * 30/max(self.x_size, self.y_size), 15)
             index = 0
-            for row in range(y_size):
-                for col in range(x_size):
+            for row in range(self.y_size):
+                for col in range(self.x_size):
                     rect = ClickableRectItem(index)
                     rect.setRect(col * cell_size, row * cell_size, cell_size, cell_size)
                     if grid[row][col]:
@@ -102,11 +104,46 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.warning(self, "Ошибка", "Ширина и длина лабиринта должны быть >=4 и принимать нечетные значения")
 
     def convert_to_graph(self):
+        self.y_size = int(self.y_lineEdit.text())
+        self.x_size = int(self.x_lineEdit.text())
+        cell_size = max(20 * 30 / max(self.x_size, self.y_size), 15)
+        pos = []
+        for row in range(self.y_size):
+            for col in range(self.x_size):
+                if not self.global_grid[row][col]:
+                    pos.append((col * cell_size, row * cell_size))
+
+        matrix = algorythms.transform_to_adjacency_table(self.global_grid)
+
         graph = GraphView()
+        graph.set_graph(self.global_grid)
         #
         #   ...
         #
         self.graphicsView.setScene(graph.get_scene())
+
+        self.convert_to_graph_btn.setText("Преобразовать в лабиринт")
+        self.convert_to_graph_btn.clicked.disconnect()
+        self.convert_to_graph_btn.clicked.connect(lambda: self.show_labyrinth())
+
+    def show_labyrinth(self):
+        cell_size = max(20 * 30 / max(self.x_size, self.y_size), 15)
+        index = 0
+        scene = QGraphicsScene()
+        for row in range(self.y_size):
+            for col in range(self.x_size):
+                rect = ClickableRectItem(index)
+                rect.setRect(col * cell_size, row * cell_size, cell_size, cell_size)
+                if self.global_grid[row][col]:
+                    brush = QColor(0, 0, 0)
+                    rect.setBrush(brush)
+                scene.addItem(rect)
+                index += 1
+        self.graphicsView.setScene(scene)
+
+        self.convert_to_graph_btn.setText("Преобразовать в граф")
+        self.convert_to_graph_btn.clicked.disconnect()
+        self.convert_to_graph_btn.clicked.connect(lambda: self.convert_to_graph())
 
     def show_path(self):
         # len(self.global_grid[0] - x
@@ -138,14 +175,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             scene.addItem(item)
 
     def clear_maze(self):
-        x_size = len(self.global_grid[0])
-        y_size = len(self.global_grid)
+        self.x_size = len(self.global_grid[0])
+        self.y_size = len(self.global_grid)
         scene = QGraphicsScene()
         self.graphicsView.setScene(scene)
-        cell_size = max(20 * 30 / max(x_size, y_size), 15)
+        cell_size = max(20 * 30 / max(self.x_size, self.y_size), 15)
         index = 0
-        for row in range(y_size):
-            for col in range(x_size):
+        for row in range(self.y_size):
+            for col in range(self.x_size):
                 rect = ClickableRectItem(index)
                 rect.setRect(col * cell_size, row * cell_size, cell_size, cell_size)
                 if grid[row][col]:
